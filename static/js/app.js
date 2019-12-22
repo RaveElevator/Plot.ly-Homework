@@ -17,9 +17,18 @@ function buildchart(sample){
             orientation: "h",
             x: otu_ids.slice(0, 10),
             y: sample_values.slice(0, 10),
-            text:otu_labels.slice(0,10)}]; 
-        Plotly.newPlot("bar", data);
-        //////////////////3. Create a bubble chart that displays each sample.
+            text:otu_labels.slice(0,10)}];
+        
+            var layout1 = {
+                title: 'Test Subject Horizontal Bar Chart Microbe Data',
+                showlegend: false,
+                height: 400,
+                width: 500
+            };    
+
+        Plotly.newPlot("bar", data, layout1);
+    
+        //////////////////3. Create a bubble chart that displays each sample. 
         var trace1 = {
             x: otu_ids,
             y: sample_values,
@@ -30,23 +39,57 @@ function buildchart(sample){
               size: sample_values,
               opacity: [1, 0.8, 0.6, 0.4],
               size: [40, 60, 80, 100]
-            }
-          };
+          }
+        };
           
-          var bubble_data = [trace1];
-          
-          var layout = {
-            title: 'Marker Size and Color',
+        var bubble_data = [trace1];
+        console.log(otu_ids)  
+        var layout = {
+            title: 'Test Subject Bubble Chart Microbe Data',
             showlegend: false,
             height: 600,
             width: 1400
-          };
+        };
           
-          Plotly.newPlot('bubble', bubble_data, layout);
+        Plotly.newPlot('bubble', bubble_data, layout);
     })
 }
-//d3.selectAll("#selDataset").on("change", updatePlotly);
-buildchart(940) 
+////////////////
+function buildmetadatadisplay(sample){
+    d3.json("samples.json").then((data) => {
+        var metadata = data.metadata;    
+        var resultArray = metadata.filter(sampleObj => sampleObj.id == sample);    
+        var result = resultArray[0];
+        var sample_metadata = d3.select("#sample-metadata");
+        sample_metadata.html("");
+        Object.entries(result).forEach(([key,value]) => {
+            sample_metadata.append("h6").text(key+" : "+ value)
+        })
+    })
+}
+//6. Update all of the plots any time that a new sample is selected.
+function dropdownupdate(sample){
+    d3.json("samples.json").then((data) => {
+        var selDataset = d3.select("#selDataset")
+        var names = data.names
+        names.forEach((name) => {
+            selDataset.append("option").text(name).property("value", name)
+        })
+        var first_sample = names[0]
+        buildchart(first_sample) 
+        buildmetadatadisplay(first_sample)
+    })
+}
+//option change function 
+function optionChanged(sample){
+        buildchart(sample) 
+        buildmetadatadisplay(sample)
+}
+// dropdown update
+dropdownupdate()
 
+//d3.selectAll("#selDataset").on("change", updatePlotly); 
+//buildchart(940) 
+//buildmetadatadisplay(940)
 
  
